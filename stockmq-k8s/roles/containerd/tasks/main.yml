@@ -1,0 +1,96 @@
+---
+# Install containerd.io runtime
+- name: Add conf for containerd
+  ansible.builtin.blockinfile:
+    path: "/etc/modules-load.d/containerd.conf"
+    create: true
+    block: |
+          overlay
+          br_netfilter
+
+- name: Load kernel modules
+  ansible.builtin.systemd:
+    name: systemd-modules-load
+    state: restarted
+
+# Enable sysctl options
+- name: Enable sysctl options
+  ansible.posix.sysctl:
+    name: '{{ item }}'
+    value: '1'
+    sysctl_set: true
+    state: present
+    reload: true
+  loop:
+    - net.ipv4.ip_forward
+    - net.bridge.bridge-nf-call-iptables
+    - net.bridge.bridge-nf-call-ip6tables
+
+- name: Add an apt signing key for the Docker
+  ansible.builtin.apt_key:
+    url: '{{ docker_apt_gpg }}'
+    state: present
+
+- name: Adding apt repository for the Docker
+  ansible.builtin.apt_repository:
+    repo: '{{ docker_apt_repository }}'
+    state: present
+    filename: docker.list
+    update_cache: true
+
+- name: Ensure containerd is installed.
+  ansible.builtin.package:
+    name: containerd.io
+    state: present
+
+# Enable systemd cgroup driver
+- name: Ensure containerd config directory exists.
+  ansible.builtin.file:
+    path: /etc/containerd
+    state: directory
+  register: containerd_dir
+
+- name: Get defaults from containerd.
+  ansible.builtin.command: containerd config default
+  changed_when: false
+  register: containerd_config_default
+
+- name: Prepare containerd/config.toml from default config
+  ansible.builtin.copy:
+    dest: /tmp/containerd_config.toml
+    content: "{{ containerd_config_default.stdout }}"
+  changed_when: false
+
+- name: Set Cgroup driver to systemd
+  ansible.builtin.lineinfile:
+    insertafter: '.*\[plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc.options\]$'
+    line: '            SystemdCgroup = true'
+    state: present
+    path: /tmp/containerd_config.toml
+  changed_when: false
+
+- name: Make sure SystemdCgroup = false is not set
+  ansible.builtin.lineinfile:
+    path: /tmp/containerd_config.toml
+    state: absent
+    line: '            SystemdCgroup = false'
+  changed_when: false
+
+- name: Copy config.toml to /etc/containerd
+  ansible.builtin.copy:
+    remote_src: true
+    src: /tmp/containerd_config.toml
+    dest: /etc/containerd/config.toml
+  changed_when: false
+
+- name: Cleanup temporary file
+  ansible.builtin.file:
+    path: /tmp/containerd_config.toml
+    state: absent
+  changed_when: false
+
+- name: Ensure containerd service is restarted.
+  ansible.builtin.systemd:
+    state: restarted
+    daemon_reload: true
+    name: containerd

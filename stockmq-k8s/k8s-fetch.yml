@@ -1,0 +1,11 @@
+---
+- name: Get kubernetes configuration
+  hosts: masters
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Fetch kubeconfig
+      ansible.builtin.fetch:
+        src: /etc/kubernetes/admin.conf
+        dest: admin.conf
+        flat: true

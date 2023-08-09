@@ -1,0 +1,4 @@
+---
+- import_playbook: k8s-reset.yml
+- import_playbook: k8s-install.yml
+- import_playbook: k8s-fetch.yml

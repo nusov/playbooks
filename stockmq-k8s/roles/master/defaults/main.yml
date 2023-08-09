@@ -1,0 +1,6 @@
+# CNI
+pod_network_cidr: 192.168.0.0/16
+cni_manifest: https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/calico.yaml
+
+# CSI
+csi_manifest: https://raw.githubusercontent.com/longhorn/longhorn/v1.5.1/deploy/longhorn.yaml

@@ -1,0 +1,8 @@
+---
+# Join workers to the master node(s)
+- name: TCP port 6443 on master is reachable from worker
+  wait_for: "host={{ hostvars['k8s-master.local']['ansible_default_ipv4']['address'] }} port=6443 timeout=1"
+
+- name: join cluster
+  command: "{{ hostvars['k8s-master.local'].join_cmd }}"
+  register: join_result

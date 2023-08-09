@@ -1,0 +1,19 @@
+---
+- name: Install common role to all k8s nodes
+  hosts: nodes
+  become: true
+  roles:
+    - common
+    - containerd
+
+- name: Initilize control plane nodes
+  hosts: masters
+  become: true
+  roles:
+    - master
+
+- name: Join worker nodes
+  hosts: workers
+  become: true
+  roles:
+    - worker

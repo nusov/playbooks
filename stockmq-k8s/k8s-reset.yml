@@ -1,0 +1,17 @@
+---
+- name: Reset all nodes used in kubernetes deployment
+  hosts: nodes
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Reset kubeadm
+      ansible.builtin.command: kubeadm reset -f
+      register: kubeadm_reset
+      changed_when: true
+    - name: Print kubeadm output
+      ansible.builtin.debug:
+        var: kubeadm_reset
+    - name: Remove CNI configuration
+      ansible.builtin.file:
+        state: absent
+        path: /etc/cni/net.d/

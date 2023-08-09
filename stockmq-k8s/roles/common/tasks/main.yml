@@ -1,0 +1,6 @@
+---
+- include_tasks: base.yml
+- include_tasks: packages.yml
+
+- name: Ensure containerd is restarted immediately if necessary.
+  meta: flush_handlers

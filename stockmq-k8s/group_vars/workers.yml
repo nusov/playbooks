@@ -1,0 +1,6 @@
+---
+# Set variables for workers nodes
+ansible_user: parallels
+ansible_port: 22
+
+ansible_become_pass: '{{ sudo_password }}'
