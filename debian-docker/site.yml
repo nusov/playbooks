@@ -1,0 +1,6 @@
+---
+- name: Install docker on nodes
+  hosts: nodes
+  become: true
+  roles:
+    - docker
