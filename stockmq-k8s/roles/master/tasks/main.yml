@@ -7,6 +7,13 @@
 - debug: 
     var: kubeadm.stdout_lines
 
+# Remove taints
+- name: Remove taints on control plane
+  ansible.builtin.command: "kubectl taint nodes --all node-role.kubernetes.io/control-plane-"
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  when: untaint
+
 # Install network
 - name: Install network
   ansible.builtin.command: "kubectl apply -f {{ cni_manifest }}"
@@ -28,7 +35,6 @@
 - name: Print output
   ansible.builtin.debug:
     var: csi.stdout_lines
-
 
 # Generate token to join workers
 - name: Generate join command

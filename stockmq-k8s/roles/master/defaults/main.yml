@@ -4,3 +4,6 @@ cni_manifest: https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/man
 
 # CSI
 csi_manifest: https://raw.githubusercontent.com/longhorn/longhorn/v1.5.1/deploy/longhorn.yaml
+
+# Taint
+untaint: false
